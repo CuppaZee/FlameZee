@@ -25,7 +25,7 @@ class MunzeeAPI {
             json: true
         })
         if(data && data.data && data.data.token && data.data.token.access_token) {
-            return data.data.token;
+            return data.data;
         } else {
             throw Error(data)
         }

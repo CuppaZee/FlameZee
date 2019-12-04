@@ -1,6 +1,6 @@
 {
-  "fix": true,
   "parserOptions": {
+    "fix": true,
     // Required for certain syntax usages
     "ecmaVersion": 2017
   },

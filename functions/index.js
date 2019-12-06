@@ -19,13 +19,25 @@ exports.generateCryptokens = functions.https.onRequest(async (req, res) => {
 exports.auth = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {
         if (!req.query.code) {
+            if(req.query.x!==undefined) {
+                return res.send(API1.authURL(req.query.cryptoken))
+            }
             return res.redirect(API1.authURL(req.query.cryptoken))
         }
         try {
             if (!req.query.state) return res.send('Missing Cryptoken')
             var { token, user_id } = await API1.getBearerToken(req.query.code)
-            db.collection('authTokens').doc(user_id.toString()).set({ token, user_id });
-            db.collection('authCryptokens').doc(req.query.state).set({ token, user_id });
+            var cryptolist = [];
+            var oldData = await db.collection('authToken').doc(user_id.toString()).get();
+            if(oldData && oldData.data() && oldData.data().cryptokens) {
+                cryptolist = oldData.data().cryptokens;
+            }
+            cryptolist.push(req.query.state)
+            db.collection('authToken').doc(user_id.toString()).set({
+                token,
+                user_id,
+                cryptokens: cryptolist
+            });
             var { data } = await API1.request(token, 'user', { user_id });
             db.collection('users').doc(user_id.toString()).set({
                 username: data.username,
@@ -44,9 +56,9 @@ async function request(page, inputdata = {}, user_id = config.default_user_id, c
     try {
         var token;
         if (!cryptoken) {
-            token = (await db.collection('authTokens').doc(user_id.toString()).get()).data().token;
+            token = (await db.collection('authToken').doc(user_id.toString()).get()).data().token;
         } else {
-            token = (await db.collection('authCryptokens').doc(user_id.toString()).get()).data().token;
+            token = (await db.collection('authToken').find('cryptokens','array-includes',user_id.toString()).get())[0].data().token;
         }
         return await API1.request(token, page, inputdata);
     } catch (e) {
@@ -54,12 +66,30 @@ async function request(page, inputdata = {}, user_id = config.default_user_id, c
     }
 }
 
-exports["user_credits"] = functions.https.onRequest(async (req, res) => {
+exports["user_activity"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {
-        if (!req.query.cryptoken) {
-            return res.status(502).send('Missing Cryptoken')
+        if (!req.query.user_id) {
+            return res.status(502).send('Missing User ID')
         }
-        return res.send(await request('user/credits', null, req.query.cryptoken, true))
+        return res.send(await request('statzee/player/day', {day:req.query.day||'2019-12-04'}, req.query.user_id))
+    })
+})
+
+exports["user_badges"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        if (!req.query.user_id) {
+            return res.status(502).send('Missing User ID')
+        }
+        return res.send(await request('user/badges', {user_id:req.query.user_id}))
+    })
+})
+
+exports["user_specials"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        if (!req.query.user_id) {
+            return res.status(502).send('Missing User ID')
+        }
+        return res.send(await request('user/specials', {user_id:req.query.user_id}))
     })
 })
 
@@ -86,5 +116,20 @@ exports["user_inventory"] = functions.https.onRequest(async (req, res) => {
             return obj;
         }, {})).map(i => ({ type: i[0], amount: i[1] }));
         res.status(200).send({ credits, undeployed, boosters, history });
+    })
+})
+
+exports["munzee_specials_overview"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        var data = await request('munzee/specials', {})
+        let output = data.data.reduce((a,b)=>{
+            a[b.logo] = (a[b.logo]||0)+1;
+            return a;
+        },{});
+        if(req.query.v===undefined) {
+            return res.send({types:output,type:req.query.type,list:data.data.filter(i=>i.logo===req.query.t)})
+        } else {
+            return res.send(`<div style="text-align:center;">${Object.keys(output).map(i=>`<a href="/munzee_specials_overview?v&t=${encodeURIComponent(i)}"><div style="display:inline-block;padding:8px;font-size:20px;font-weight:bold;"><img style="height:50px;width:50px;" src="${i}"/><br>${output[i]}</div>`).join('')}</div>${data.data.filter(i=>i.logo===req.query.t).map(i=>`<div><a href="${i.full_url}">${i.friendly_name}</a></div>`).join('')}`)
+        }
     })
 })

@@ -21,6 +21,26 @@
         "function": "auth"
       },
       {
+        "source": "/user/activity",
+        "function": "user_activity"
+      },
+      {
+        "source": "/user/badges",
+        "function": "user_badges"
+      },
+      {
+        "source": "/user/specials",
+        "function": "user_specials"
+      },
+      {
+        "source": "/user/inventory",
+        "function": "user_inventory"
+      },
+      {
+        "source": "/munzee/specials/overview",
+        "function": "munzee_specials_overview"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

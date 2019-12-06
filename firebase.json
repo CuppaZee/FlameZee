@@ -21,6 +21,10 @@
         "function": "auth"
       },
       {
+        "source": "/auth/cryptoken",
+        "function": "generateCryptokens"
+      },
+      {
         "source": "/user/activity",
         "function": "user_activity"
       },

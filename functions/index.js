@@ -45,7 +45,7 @@ exports.auth = functions.https.onRequest(async (req, res) => {
                 time: Date.now(),
                 doneCheck: req.query.state.slice(0, 5)
             });
-            return res.send(`Successfully Authenticated... Redirecting...<script>setTimeout(function(){window.location.replace("https://cuppazee.uk/authsuccess/${req.query.state}")},2000)</script>`);
+            return res.send(`Successfully Authenticated... Redirecting...<script>setTimeout(function(){window.location.replace("https://cuppazee.uk/authsuccess/${req.query.state}/${user_id}")},2000)</script>`);
         } catch (e) {
             return res.send('An Error Occured');
         }

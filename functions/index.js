@@ -20,9 +20,9 @@ exports.auth = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {
         if (!req.query.code) {
             if(req.query.x!==undefined) {
-                return res.send(API1.authURL(req.query.cryptoken))
+                return res.send(API1.authURL(req.query.cryptoken||crypto.randomBytes(20).toString('hex')))
             }
-            return res.redirect(API1.authURL(req.query.cryptoken))
+            return res.redirect(API1.authURL(req.query.cryptoken||crypto.randomBytes(20).toString('hex')))
         }
         try {
             if (!req.query.state) return res.send('Missing Cryptoken')

@@ -58,10 +58,11 @@ async function request(page, inputdata = {}, user_id = config.default_user_id, c
         if (!cryptoken) {
             token = (await db.collection('authToken').doc(user_id.toString()).get()).data().token;
         } else {
-            token = (await db.collection('authToken').find('cryptokens','array-includes',user_id.toString()).get())[0].data().token;
+            token = (await db.collection('authToken').where('cryptokens','array-contains',user_id.toString()).limit(1).get()).docs[0].data().token;
         }
         return await API1.request(token, page, inputdata);
     } catch (e) {
+        console.log(e)
         return { data: null }
     }
 }
@@ -131,5 +132,17 @@ exports["munzee_specials_overview"] = functions.https.onRequest(async (req, res)
         } else {
             return res.send(`<div style="text-align:center;">${Object.keys(output).map(i=>`<a href="/munzee_specials_overview?v&t=${encodeURIComponent(i)}"><div style="display:inline-block;padding:8px;font-size:20px;font-weight:bold;"><img style="height:50px;width:50px;" src="${i}"/><br>${output[i]}</div>`).join('')}</div>${data.data.filter(i=>i.logo===req.query.t).map(i=>`<div><a href="${i.full_url}">${i.friendly_name}</a></div>`).join('')}`)
         }
+    })
+})
+
+exports["clan_requirements"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        return res.send(await request('clan/v2/requirements', {game_id:81,clan_id:1349}))
+    })
+})
+
+exports["cuppazee_credits"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        return res.send({})
     })
 })

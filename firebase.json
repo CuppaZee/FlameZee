@@ -25,6 +25,10 @@
         "function": "generateCryptokens"
       },
       {
+        "source": "/user/details",
+        "function": "user_details"
+      },
+      {
         "source": "/user/activity",
         "function": "user_activity"
       },

@@ -45,7 +45,7 @@ exports.auth = functions.https.onRequest(async (req, res) => {
                 time: Date.now(),
                 doneCheck: req.query.state.slice(0, 5)
             });
-            return res.send(`Successfully Authenticated... Redirecting...<script>setTimeout(function(){window.location.replace("https://cuppazee.uk/authsuccess/${req.query.state}/${user_id}")},2000)</script>`);
+            return res.send(`Successfully Authenticated... Redirecting...<script>setTimeout(function(){window.location.replace("https://cuppazee.uk/authsuccess/${req.query.state}/${user_id}/${data.username}")},2000)</script>`);
         } catch (e) {
             return res.send('An Error Occured');
         }
@@ -66,6 +66,24 @@ async function request(page, inputdata = {}, user_id = config.default_user_id, c
         return { data: null }
     }
 }
+
+exports["user_details"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        if (!req.query.user_id) {
+            return res.status(502).send('Missing User ID')
+        }
+        return res.send(await request('user', {user_id:req.query.user_id}))
+    })
+})
+
+exports["user_search"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        if (!req.query.query) {
+            return res.status(502).send('Missing Query')
+        }
+        return res.send(await request('user/find', {text:req.query.query}))
+    })
+})
 
 exports["user_activity"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {

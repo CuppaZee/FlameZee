@@ -54,11 +54,17 @@ exports.auth = functions.https.onRequest(async (req, res) => {
 
 async function request(page, inputdata = {}, user_id = config.default_user_id, cryptoken) {
     try {
-        var token;
+        var token, document;
         if (!cryptoken) {
-            token = (await db.collection('authToken').doc(user_id.toString()).get()).data().token;
+            document = await db.collection('authToken').doc(user_id.toString()).get()
+            token = document.data().token;
         } else {
-            token = (await db.collection('authToken').where('cryptokens','array-contains',user_id.toString()).limit(1).get()).docs[0].data().token;
+            document = (await db.collection('authToken').where('cryptokens','array-contains',user_id.toString()).limit(1).get()).docs[0]
+            token = document.data().token;
+        }
+        if(token.expires >= Date.now()-60000){
+            token = await API1.refreshToken(token);
+            await document.update({token:token});
         }
         return await API1.request(token, page, inputdata);
     } catch (e) {
@@ -148,14 +154,34 @@ exports["munzee_specials_overview"] = functions.https.onRequest(async (req, res)
         if(req.query.v===undefined) {
             return res.send({types:output,type:req.query.type,list:data.data.filter(i=>i.logo===req.query.t)})
         } else {
-            return res.send(`<div style="text-align:center;">${Object.keys(output).map(i=>`<a href="/munzee_specials_overview?v&t=${encodeURIComponent(i)}"><div style="display:inline-block;padding:8px;font-size:20px;font-weight:bold;"><img style="height:50px;width:50px;" src="${i}"/><br>${output[i]}</div>`).join('')}</div>${data.data.filter(i=>i.logo===req.query.t).map(i=>`<div><a href="${i.full_url}">${i.friendly_name}</a></div>`).join('')}`)
+            return res.send(`<div style="text-align:center;">${Object.keys(output).map(i=>`<a href="${req.originalUrl.includes('munzee/specials')?'/munzee/specials/overview':'/munzee_specials_overview'}?v&t=${encodeURIComponent(i)}"><div style="display:inline-block;padding:8px;font-size:20px;font-weight:bold;"><img style="height:50px;width:50px;" src="${i}"/><br>${output[i]}</div>`).join('')}</div>${data.data.filter(i=>i.logo===req.query.t).map(i=>`<div><a href="${i.full_url}">${i.friendly_name}</a></div>`).join('')}`)
+        }
+    })
+})
+
+exports["munzee_treehouse_bouncers"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        if (!req.query.user) {
+            return res.status(502).send('Missing Username')
+        }
+        if (!req.query.munzee) {
+            return res.status(502).send('Missing Munzee')
+        }
+        var data = await request('munzee', {url:`/m/${req.query.user}/${req.query.munzee}`});
+        if(data.data.pin_icon.includes('treehouse')) {
+            return res.send(data.data.bouncers||[]);
+        } else {
+            return res.send([]);
         }
     })
 })
 
 exports["clan_requirements"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {
-        return res.send(await request('clan/v2/requirements', {game_id:81,clan_id:1349}))
+        return res.send({
+            requirements: await request('clan/v2/requirements', {game_id:82,clan_id:1349}),
+            rewards: await request('clan/v2/challenges/82')
+        })
     })
 })
 

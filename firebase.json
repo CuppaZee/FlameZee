@@ -49,6 +49,10 @@
         "function": "munzee_specials_overview"
       },
       {
+        "source": "/munzee/treehouse",
+        "function": "munzee_treehouse_bouncers"
+      },
+      {
         "source": "/clan/requirements",
         "function": "clan_requirements"
       },

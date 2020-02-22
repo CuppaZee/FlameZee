@@ -159,6 +159,31 @@ exports["munzee_specials_overview"] = functions.https.onRequest(async (req, res)
     })
 })
 
+exports["munzee_bouncers_overview"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        var body = await Promise.all([
+            request('munzee/specials', {}),
+            request('munzee/specials/mythological', {}),
+            request('munzee/specials/pouchcreatures', {}),
+            request('munzee/specials/retired', {}),
+            request('munzee/specials/flat', {}),
+            request('munzee/specials/bouncers', {})
+        ])
+        var data = {
+            data: [].concat(...body.map(i=>i.data))
+        }
+        let output = data.data.reduce((a,b)=>{
+            a[(b.mythological_munzee?b.mythological_munzee.munzee_logo:b.logo)] = (a[(b.mythological_munzee?b.mythological_munzee.munzee_logo:b.logo)]||0)+1;
+            return a;
+        },{});
+        if(req.query.v===undefined) {
+            return res.send({types:output,type:req.query.type,list:data.data.filter(i=>(i.mythological_munzee?i.mythological_munzee.munzee_logo:i.logo)===req.query.t)})
+        } else {
+            return res.send(`<div style="text-align:center;">${Object.keys(output).map(i=>`<a href="${req.originalUrl.includes('munzee/specials')?'/munzee/bouncers/overview':'/munzee_bouncers_overview'}?v&t=${encodeURIComponent(i)}"><div style="display:inline-block;padding:8px;font-size:20px;font-weight:bold;"><img style="height:50px;width:50px;" src="${i}"/><br>${output[i]}</div>`).join('')}</div>${data.data.filter(i=>(i.mythological_munzee?i.mythological_munzee.munzee_logo:i.logo)===req.query.t).map(i=>`<div>${i.mythological_munzee?`<a href="${i.mythological_munzee.code}">${i.mythological_munzee.friendly_name}</a> by <a href="https://www.munzee.com/m/${i.mythological_munzee.creator_username}">${i.mythological_munzee.creator_username}</a> at `:''}<a href="${i.full_url}">${i.friendly_name}</a></div>`).join('')}`)
+        }
+    })
+})
+
 exports["munzee_treehouse_bouncers"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {
         if (!req.query.user) {
@@ -185,8 +210,37 @@ exports["clan_requirements"] = functions.https.onRequest(async (req, res) => {
     })
 })
 
+exports["clan_details"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        return res.send({
+            requirements: await request('clan/v2/requirements', {game_id:82,clan_id:req.query.clan_id}),
+            details: await request('clan/v2', {clan_id:req.query.clan_id})
+        })
+    })
+})
+
 exports["cuppazee_credits"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async function () {
         return res.send({})
+    })
+})
+
+// Hack to Find Event Endpoint (Failed)
+exports["find_calendar"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async function () {
+        var arr = [];
+        var x = ["calendar","event","events","nearby","v4",""];
+
+        for(var a of x) {
+            for(var b of x) {
+                for(var c of x) {
+                    arr.push([a,b,c].filter(i=>i).join('/'));
+                }  
+            } 
+        }
+        console.log(arr.join('\n'))
+        var q = Array.from(new Set(arr)).map(i=>request(i));
+        var data = await Promise.all(q);
+        return res.send(data)
     })
 })

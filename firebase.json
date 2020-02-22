@@ -45,6 +45,10 @@
         "function": "user_inventory"
       },
       {
+        "source": "/user/search",
+        "function": "user_search"
+      },
+      {
         "source": "/munzee/specials/overview",
         "function": "munzee_specials_overview"
       },
@@ -55,6 +59,10 @@
       {
         "source": "/clan/requirements",
         "function": "clan_requirements"
+      },
+      {
+        "source": "/clan/details",
+        "function": "clan_details"
       },
       {
         "source": "**",

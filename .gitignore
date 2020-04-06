@@ -23,6 +23,8 @@ down
 
 *.backup.js
 
+yarn-error.log
+
 # Runtime data
 pids
 *.pid

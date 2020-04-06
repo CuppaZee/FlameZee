@@ -43,7 +43,7 @@ module.exports = [
                 }
                 needle(
                     'post',
-                    'https://discordapp.com/api/webhooks/695974439040581643/tH-e4vdXk04gCItHieXoxNBdtjoyXfOkEuW67JAJXYK-bmfNTDI01XSQTdi8-AhtmbCt',
+                    config.discord.auth,
                     {
                         content:discordmessage
                     }

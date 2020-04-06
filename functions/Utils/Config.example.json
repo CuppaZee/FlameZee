@@ -1,0 +1,12 @@
+{
+    "default_user_id": 123456,
+    "Auth1": {
+        "client_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxx",
+        "redirect_uri": "https://yoursite.com/auth"
+    },
+    "codes": {
+        "xxxxxxxxxxx1": [0,1586592619074],
+        "xxxxxxxxxxx2": [1586506309343,1587197521642]
+    }
+}

@@ -17,6 +17,11 @@ firebase-debug.log*
 .firebaserc
 
 public
+paper
+/clan
+down
+
+*.backup.js
 
 # Runtime data
 pids

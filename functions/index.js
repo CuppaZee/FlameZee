@@ -230,7 +230,8 @@ exports["clan_details_formatted"] = functions.https.onRequest(async (req, res) =
             1793,
             1551,
             1605,
-            19
+            19,
+            1695
         ];
         var [ requirements, clan, shadow_data ] = (await Promise.all([
             request('clan/v2/requirements', { game_id: req.query.game_id||"85", clan_id: Number(req.query.clan_id||"1349")<0?1349:Number(req.query.clan_id||"1349") }),

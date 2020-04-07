@@ -19,6 +19,14 @@
       ],
       "rewrites": [
         {
+          "source": "/terms",
+          "destination": "/cuppazeeterms.html"
+        },
+        {
+          "source": "/privacy",
+          "destination": "/cuppazeeprivacy.html"
+        },
+        {
           "source": "/auth",
           "function": "auth_v1"
         },

@@ -8,10 +8,7 @@ module.exports = {
             bottom: "Activity",
             icon: "https://i.ibb.co/K5ZmXqc/Total-1.png",
             total: "min",
-            function: ({cap,dep,con}) => Object.keys([...cap,...dep,...con].reduce((a,x)=>{
-                a[(x.captured_at||x.deployed_at).slice(0,10)] = true;
-                return a;
-            },{})).length
+            function: ({cap,dep}) => [...cap,...dep].filter(i=>!new activity(i).munzee.is_personal).length>0?1:0
         },
         3: {
             task_id: 3,

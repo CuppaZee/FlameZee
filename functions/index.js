@@ -42,6 +42,9 @@ exports.user_activity_v1 = _user_activity[0];
 var _clan_requirements = require('./Modules/clan/requirements');
 exports.clan_requirements_v1 = _clan_requirements[0];
 
+var _clan_details = require('./Modules/clan/details');
+exports.clan_details_v1 = _clan_details[0];
+
 var _clan_list = require('./Modules/clan/list');
 exports.clan_list_v1 = _clan_list[0];
 
@@ -150,115 +153,12 @@ exports["munzee_bouncers_overview"] = functions.https.onRequest(async (req, res)
     })
 })
 
-exports["munzee_treehouse_bouncers"] = functions.https.onRequest(async (req, res) => {
-    return cors(req, res, async () => {
-        if (!req.query.user) {
-            return res.status(502).send('Missing Username')
-        }
-        if (!req.query.munzee) {
-            return res.status(502).send('Missing Munzee')
-        }
-        var data = await request('munzee', { url: `/m/${req.query.user}/${req.query.munzee}` });
-        if (data.data.pin_icon.includes('treehouse')) {
-            return res.send(data.data.bouncers || []);
-        } else {
-            return res.send([]);
-        }
-    })
-})
-
 exports["clan_requirements"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async () => {
         return res.send({
             requirements: await request('clan/v2/requirements', { game_id: req.query.game_id, clan_id: 1349 }),
             rewards: await request(`clan/v2/challenges/${req.query.game_id}`, {}, 234392)
         })
-    })
-})
-
-exports["clan_details_formatted"] = functions.https.onRequest(async (req, res) => {
-    return cors(req, res, async () => {
-        const shadow = [
-            1902,
-            1349,
-            457,
-            1441,
-            1870,
-            1493,
-            -1,
-            -2,
-            -3,
-            -4,
-            251,
-            1793,
-            1551,
-            1605,
-            19,
-            1695,
-            1343
-        ];
-        var [ requirements, clan, shadow_data ] = (await Promise.all([
-            request('clan/v2/requirements', { game_id: req.query.game_id||"85", clan_id: Number(req.query.clan_id||"1349")<0?1349:Number(req.query.clan_id||"1349") }),
-            request('clan/v2', { clan_id: Number(req.query.clan_id||"1349") }),
-            shadow.includes(Number(req.query.clan_id||"1349"))?db.collection('shadow').doc((req.query.clan_id||"1349").toString()).get():null
-        ].filter(i=>i))).map(i=>typeof (i||{}).data!=="function"?(i||{}).data:i.data());
-        if(!clan) return {};
-        var details = {
-            details: (shadow_data&&shadow_data.details)?{
-                clan_id: shadow_data.clan_id,
-                name: shadow_data.details.name,
-                simple_name: shadow_data.details.simple_name,
-                tagline: shadow_data.details.tagline,
-                // creator: Number(clan.details.created_by_userid),
-                logo: shadow_data.details.logo,
-                privacy: shadow_data.details.privacy,
-                goal: shadow_data.details.goal,
-                members: Number(shadow_data.members.length)
-            }:{
-                clan_id: Number(clan.details.id),
-                name: clan.details.name,
-                simple_name: clan.details.simple_name,
-                tagline: clan.details.tagline,
-                creator: Number(clan.details.created_by_userid),
-                logo: clan.details.logo,
-                privacy: clan.details.privacy,
-                goal: clan.details.goal,
-                members: Number(clan.details.members)
-            },
-            members: [
-                ...(clan.users||[]).map(i=>({
-                    user_id: Number(i.user_id),
-                    username: i.username,
-                    leader: i.is_admin==="1",
-                    ghost: false
-                })),
-                ...shadow_data?shadow_data.members.map(i=>({
-                    user_id: Number(i),
-                    username: (shadow_data.usernames||{})[i]||i.toString(),
-                    leader: false,
-                    ghost: true
-                })):[]
-            ].sort((a,b)=>a.user_id-b.user_id),
-            requirements: {}
-        };
-        for (var level in requirements.data.levels) {
-            var level_requirements = requirements.data.levels[level];
-            for(var requirement of [...level_requirements.individual,...level_requirements.group].sort((a,b)=>a.id-b.id)) {
-                if(!details.requirements[requirement.task_id]) {
-                    details.requirements[requirement.task_id] = {
-                        users: Object.assign({},shadow_data?shadow_data.data[requirement.task_id]||{}:{},shadow_data&&shadow_data.details?{}:requirement.data),
-                        total: Object.values(Object.assign({},shadow_data?shadow_data.data[requirement.task_id]||{}:{},shadow_data&&shadow_data.details?{}:requirement.data)).reduce(
-                            (__clan.tasks[requirement.task_id]||{}).total==="min"?
-                                (a,b)=>Math.min(a,b):
-                                (a,b)=>a+b,
-                            (__clan.tasks[requirement.task_id]||{}).total==="min"?Infinity:0
-                        ),
-                        task_id: requirement.task_id,
-                    }
-                }
-            }
-        }
-        return res.send(details)
     })
 })
 

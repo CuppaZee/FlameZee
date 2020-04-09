@@ -103,10 +103,6 @@
           "function": "munzee_bouncers_v1"
         },
         {
-          "source": "/munzee/treehouse",
-          "function": "munzee_treehouse_bouncers"
-        },
-        {
           "source": "/clan/requirements/v1",
           "function": "clan_requirements_v1"
         },
@@ -123,16 +119,20 @@
           "function": "clan_list_v1"
         },
         {
-          "source": "/clan/requirements/formatted",
-          "function": "clan_requirements_formatted"
-        },
-        {
           "source": "/clan/details",
           "function": "clan_details"
         },
         {
           "source": "/clan/details/formatted",
-          "function": "clan_details_formatted"
+          "function": "clan_details_v1"
+        },
+        {
+          "source": "/clan/details",
+          "function": "clan_details_v1"
+        },
+        {
+          "source": "/clan/details/v1",
+          "function": "clan_details_v1"
         },
         {
           "source": "/bingo",

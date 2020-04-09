@@ -42,8 +42,14 @@ exports.user_activity_v1 = _user_activity[0];
 var _clan_requirements = require('./Modules/clan/requirements');
 exports.clan_requirements_v1 = _clan_requirements[0];
 
+var _clan_list = require('./Modules/clan/list');
+exports.clan_list_v1 = _clan_list[0];
+
 var _munzee_bouncers = require('./Modules/munzee/bouncers');
 exports.munzee_bouncers_v1 = _munzee_bouncers[0];
+
+var _bouncers_limbo = require('./Modules/bouncers/limbo');
+exports.bouncers_limbo_v1 = _bouncers_limbo[0];
 
 var _dev = require('./Modules/dev');
 exports.dev_v1 = _dev[0];
@@ -144,49 +150,6 @@ exports["munzee_bouncers_overview"] = functions.https.onRequest(async (req, res)
     })
 })
 
-exports["munzee_limbos_overview"] = functions.https.onRequest(async (req, res) => {
-    return cors(req, res, async () => {
-        var body = await Promise.all([
-            request('munzee/specials/mythological', {}),
-            request('munzee/specials/pouchcreatures', {}),
-            // request('munzee/specials/retired', {}),
-            request('munzee/specials/flat', {}),
-            request('munzee/specials/bouncers', {}),
-            request('statzee/global/types', {})
-        ])
-        var y = body[body.length - 1];
-        var data = {
-            data: [].concat(...body.map(i => i.data).slice(0, -1))
-        }
-        function x(a) {
-            if (a.includes('tuli')) return 'https://munzee.global.ssl.fastly.net/images/pins/tuli.png';
-            if (a.includes('vesi')) return 'https://munzee.global.ssl.fastly.net/images/pins/vesi.png';
-            if (a.includes('muru')) return 'https://munzee.global.ssl.fastly.net/images/pins/muru.png';
-            if (a.includes('megu')) return 'https://munzee.global.ssl.fastly.net/images/pins/mitmegu.png';
-            if (a.includes('/puf')) return 'https://munzee.global.ssl.fastly.net/images/pins/puffle.png';
-            return a;
-        }
-        let output = data.data.reduce((a, b) => {
-            a[x(b.mythological_munzee ? b.mythological_munzee.munzee_logo : b.logo)] = (a[x(b.mythological_munzee ? b.mythological_munzee.munzee_logo : b.logo)] || 0) + 1;
-            return a;
-        }, {});
-        var onmap = 0;
-        var total = 0;
-        var z = Object.keys(output);
-        for (i of z) {
-            //Math.floor((Number(output[i]) / Number((y.data.find(x=>x.logo===i)||{}).number))*10000)/100
-            onmap += output[i];
-            total += Number((y.data.find(x => x.logo === i) || {}).number);
-        }
-        var percent = Math.floor((onmap / total) * 1000000) / 10000;
-        if (req.query.v === undefined) {
-            return res.send({ onmap, total, percent, types: output, type: req.query.type })
-        } else {
-            return res.send(`<div style="text-align:center;font-size:2em;font-weight:bold;"><div>${onmap} / ${total} Bouncers on the map | ${percent}%</div>${Object.keys(output).map(i => `<div style="display:inline-block;padding:4px;font-size:20px;font-weight:bold;width:112px;border:1px solid black;margin:4px;border-radius:8px;"><img style="height:50px;width:50px;" src="${i}"/><br>${output[i]} / ${(y.data.find(x => x.logo === i) || {}).number}<br>${Math.floor((Number(output[i]) / Number((y.data.find(x => x.logo === i) || {}).number)) * 10000) / 100}%</div>`).join('')}</div>`)
-        }
-    })
-})
-
 exports["munzee_treehouse_bouncers"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async () => {
         if (!req.query.user) {
@@ -231,7 +194,8 @@ exports["clan_details_formatted"] = functions.https.onRequest(async (req, res) =
             1551,
             1605,
             19,
-            1695
+            1695,
+            1343
         ];
         var [ requirements, clan, shadow_data ] = (await Promise.all([
             request('clan/v2/requirements', { game_id: req.query.game_id||"85", clan_id: Number(req.query.clan_id||"1349")<0?1349:Number(req.query.clan_id||"1349") }),
@@ -282,8 +246,8 @@ exports["clan_details_formatted"] = functions.https.onRequest(async (req, res) =
             for(var requirement of [...level_requirements.individual,...level_requirements.group].sort((a,b)=>a.id-b.id)) {
                 if(!details.requirements[requirement.task_id]) {
                     details.requirements[requirement.task_id] = {
-                        users: Object.assign({},shadow_data?shadow_data.data[requirement.task_id]||{}:{},shadow_data.details?{}:requirement.data),
-                        total: Object.values(Object.assign({},shadow_data?shadow_data.data[requirement.task_id]||{}:{},shadow_data.details?{}:requirement.data)).reduce(
+                        users: Object.assign({},shadow_data?shadow_data.data[requirement.task_id]||{}:{},shadow_data&&shadow_data.details?{}:requirement.data),
+                        total: Object.values(Object.assign({},shadow_data?shadow_data.data[requirement.task_id]||{}:{},shadow_data&&shadow_data.details?{}:requirement.data)).reduce(
                             (__clan.tasks[requirement.task_id]||{}).total==="min"?
                                 (a,b)=>Math.min(a,b):
                                 (a,b)=>a+b,
@@ -535,6 +499,46 @@ exports["overpass"] = functions.https.onRequest(async (req, res) => {
 })
 
 
+exports.clan_list_minute = functions.runWith({memory:"512MB"}).pubsub.topic('shadow').onPublish(async (message) => {
+    var clans = (await db.collection('data').doc('clans').get()).data();
+    var array = [];
+    for(var i = clans.counter;i < (clans.counter+10);i++) {
+        array.push(request('clan/v2',{clan_id:i}))
+    }
+    var found = false;
+    var data = await Promise.all(array);
+    for(var d of data) {
+        try {
+            let det = d.data.details;
+            if(det.name && det.members) {
+                found = true;
+                clans.clans[det.clan_id] = {
+                    name: det.name,
+                    tagline: det.tagline
+                }
+            } else if(det.name) {
+                found = true;
+                delete clans.clans[det.clan_id]
+            }
+        } catch(e) {
+            console.log('No Clan')
+        }
+    }
+    clans.counter = found ? i : 0;
+    clans.clans[-1] = {
+        name: "CuppaClans Shadow Crew",
+        logo: "https://munzee.global.ssl.fastly.net/images/pins/ghost.png",
+        tagline: "We'll join soon!"
+    }
+    clans.clans[-2] = {
+        name: "Bushrangers Shadow",
+        logo: "https://i.ibb.co/hs3Z3rN/Bushrangers-Ghost.png",
+        tagline: "Boo!"
+    }
+    await db.collection('data').doc('clans').set(clans);
+});
+
+
 exports.minute = functions.runWith({memory:"512MB",timeoutSeconds:540}).pubsub.topic('shadow').onPublish(async (message) => {
     var shadowDoc = (await db.collection('shadow').orderBy('updated_at').limit(1).get()).docs[0]
     var shadowData = (shadowDoc||{data:function(){}}).data();
@@ -630,5 +634,33 @@ exports["mhq_time"] = functions.https.onRequest(async (req, res) => {
 exports["usercount"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async () => {
         return res.send(`Users: ${(await db.collection('users').listDocuments()).length.toString()}`)
+    })
+})
+
+exports["bingo"] = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async () => {
+        var aaa = `<input id="x" value="" oninput="aaaa()" placeholder="username" type="text" /><a id="xd"></a><script>function aaaa(){
+            var x = document.getElementById('x');
+            var xd = document.getElementById('xd');
+            xd.href = \`https://flame.cuppazee.uk/bingo?username=\${x.value}\`;
+            xd.innerText = x.value;
+        }</script>`
+        if(!req.query.username) return res.send(aaa);
+        if(req.query.username === "YOURUSERNAME") return res.send(aaa);
+        var userdata = await request('user',{username:req.query.username})
+        var user_id = userdata.data.user_id;
+        var specials = [
+            `louroll`,'quiznormal','1starmotel','birthday','rainbowtrail',
+            'elekter','tardytimetraveler','surprise','shurikenninja-breadman','rainbowunicorn',
+            'virtual_citrine','virtual_rainbow','munzee','temporaryvirtual','virtual_onyx',
+            'motherearth','rootrunnerboomerang','mystery','partingseaboomerang','redheartbreaker',
+            'h.zee.wells%27timemachine','bcapin','premium','nfc','thereturn'
+        ]
+        var {data} = await request('user/specials',{user_id:user_id});
+        return res.send(`<div style="width:335px">${specials.map(i=>{
+            var x = (data.find(a=>a.logo===i)||{count:0}).count||0;
+            if(i==="munzee") x = 1;
+            return `<div style="padding:4px;display:inline-block;border:4px solid ${x?'green':'red'};background-color: ${x?'#aaffaa':'#ffaaaa'}"><img style="height:50px;width:50px;" src="https://munzee.global.ssl.fastly.net/images/pins/${i}.png" /></div>`
+        }).join('')}</div><div>Generated by<br>https://flame.cuppazee.uk/bingo?username=${req.query.username}</div>`)
     })
 })

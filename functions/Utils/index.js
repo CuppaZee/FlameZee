@@ -14,7 +14,7 @@ const cors = require('cors')({
 const crypto = require("crypto");
 const POLYfromEntries = require('object.fromentries');
 
-function send(req, res, startTime, status, data = null, error = null) {
+function send(params, req, res, startTime, status, data = null, error = null) {
   var x;
   if (status === 1) {
     x = {
@@ -51,6 +51,7 @@ function send(req, res, startTime, status, data = null, error = null) {
   }
   let pt = process.hrtime(startTime);
   x.executed_in = pt[0] * 1e9 + pt[1];
+  x.parameters = params;
   return res.status(x.status_code).type('json').send(x);
 }
 

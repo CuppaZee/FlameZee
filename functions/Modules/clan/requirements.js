@@ -4,8 +4,14 @@ module.exports = [
   functions.https.onRequest(async (req, res) => {
     var startTime = process.hrtime();
     return cors(req, res, async () => {
+      var params = {
+        game_id: {
+          type: "number",
+          required: true,
+        }
+      }
       if (!req.query.game_id) {
-        return send(req, res, startTime, 3, 'game_id')
+        return send(params, req, res, startTime, 3, 'game_id')
       }
       var [requirements, rewards] = (await Promise.all([
         Flame.Request('clan/v2/requirements', { game_id: req.query.game_id, clan_id: 1349 }),
@@ -136,7 +142,7 @@ module.exports = [
       reqs.order.individual = [].concat(reqs.order.individual.filter(i => !reqs.order.group.includes(i)).sort((a, b) => a.group_id - b.group_id), reqs.order.individual.filter(i => reqs.order.group.includes(i)).sort((a, b) => a.group_id - b.group_id))
       reqs.order.group = [].concat(reqs.order.group.filter(i => reqs.order.individual.includes(i)).sort((a, b) => a.group_id - b.group_id), reqs.order.group.filter(i => !reqs.order.individual.includes(i)).sort((a, b) => a.group_id - b.group_id))
       reqs.order.requirements = [].concat(reqs.order.individual.filter(i => !reqs.order.group.includes(i)), reqs.order.group.filter(i => reqs.order.individual.includes(i)), reqs.order.group.filter(i => !reqs.order.individual.includes(i)))
-      return send(req, res, startTime, 1, reqs)
+      return send(params, req, res, startTime, 1, reqs)
     })
   })
 ];

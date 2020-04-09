@@ -39,6 +39,14 @@
           "function": "generateCryptokens"
         },
         {
+          "source": "/bouncers/limbo",
+          "function": "bouncers_limbo_v1"
+        },
+        {
+          "source": "/bouncers/limbo/v1",
+          "function": "bouncers_limbo_v1"
+        },
+        {
           "source": "/user/details",
           "function": "user_details_v1"
         },
@@ -107,6 +115,14 @@
           "function": "clan_requirements"
         },
         {
+          "source": "/clan/list",
+          "function": "clan_list_v1"
+        },
+        {
+          "source": "/clan/list/v1",
+          "function": "clan_list_v1"
+        },
+        {
           "source": "/clan/requirements/formatted",
           "function": "clan_requirements_formatted"
         },
@@ -117,6 +133,10 @@
         {
           "source": "/clan/details/formatted",
           "function": "clan_details_formatted"
+        },
+        {
+          "source": "/bingo",
+          "function": "bingo"
         },
         {
           "source": "**",

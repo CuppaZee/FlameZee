@@ -130,7 +130,6 @@ class MunzeeAPI {
         //     data:querystring.stringify({data:JSON.stringify(inputdata)}),
         //     json: true
         // })
-        console.log(data.body);
         return data.body;
     }
 }

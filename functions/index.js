@@ -171,12 +171,6 @@ exports["clan_details"] = functions.https.onRequest(async (req, res) => {
     })
 })
 
-exports["cuppazee_credits"] = functions.https.onRequest(async (req, res) => {
-    return cors(req, res, async () => {
-        return res.send({})
-    })
-})
-
 // Hack to Find Event Endpoint (Failed)
 exports["find_calendar"] = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async () => {
@@ -516,7 +510,7 @@ exports.minute = functions.runWith({memory:"512MB",timeoutSeconds:540}).pubsub.t
     return await shadowDoc.ref.update({
         data: members,
         archive_data: shadowData.archive_data,
-        members: shadowData.members,
+        members: shadowData.members.filter(i=>!clan.users.find(x=>x.user_id===i)),
         updated_at: Date.now(),
     })
 

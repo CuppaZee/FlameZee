@@ -71,6 +71,8 @@ module.exports = class Activity {
 
             "rainbowtrail;redzed;orangezed;yellowzed;greenzed;bluezed;indigozed;violetzed;louroll;"+
 
+            "babyfawn;babylamb;babybunny;babytiger;babychick;"+
+
             "rainbowunicorn;gnomeleprechaun;icedragon;sasquatchyeti;firepegasus;chimera;cherub;ogre;siren;fairygodmother;gorgon;motherearth;"+
 
             "hadavale;"

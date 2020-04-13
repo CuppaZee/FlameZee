@@ -39,7 +39,8 @@ module.exports = [
         1605,
         19,
         1695,
-        1343
+        1343,
+        1364
       ];
       var [requirements, clan, shadow_data] = (await Promise.all([
         Flame.Request('clan/v2/requirements', { game_id: req.query.game_id || "85", clan_id: Number(req.query.clan_id || "1349") < 0 ? 1349 : Number(req.query.clan_id || "1349") }),

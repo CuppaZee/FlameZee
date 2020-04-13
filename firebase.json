@@ -27,6 +27,14 @@
           "destination": "/cuppazeeprivacy.html"
         },
         {
+          "source": "/db/munzees/list",
+          "function": "db_munzees_list_v1"
+        },
+        {
+          "source": "/db/munzees/list/v1",
+          "function": "db_munzees_list_v1"
+        },
+        {
           "source": "/auth",
           "function": "auth_v1"
         },

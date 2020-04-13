@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+const yaml = require('js-yaml')
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const moment = require('moment');
@@ -65,9 +68,11 @@ async function FlameRequest(page, inputdata = {}, user_id = config.default_user_
       document = (await db.collection('authToken').where('cryptokens', 'array-contains', user_id.toString()).limit(1).get()).docs[0]
       token = document.data().token;
     }
-    if (token.expires >= Date.now() - 60000) {
-      token = await FlameAPI.refreshToken(token);
-      await document.update({ token: token });
+    if (token.expires * 1000 < Date.now() + 60000) {
+    // if (token.expires >= Date.now() - 60000) {
+        console.log('Refresh',token);
+        token = await FlameAPI.refreshToken(token);
+        await document.ref.update({ token: token });
     }
     return await FlameAPI.request(token, page, inputdata);
   } catch (e) {
@@ -82,6 +87,12 @@ function validateCode(code) {
   } else {
     return false;
   }
+}
+
+const mdbmunzees = yaml.safeLoad(fs.readFileSync(path.join(__dirname,'db/Munzees.yaml'), 'utf8'));
+mdbmunzees.get = function(x) {
+  var y = this.find(x);
+  return this.find(i=>i.id===(y.redirect||y.id));
 }
 
 module.exports = {
@@ -110,5 +121,8 @@ module.exports = {
   },
   utils: {
     clan: __clan,
+  },
+  mdb: {
+    Munzees: mdbmunzees
   }
 }

@@ -16,7 +16,7 @@ class MunzeeAPI {
     }
     
     authURL (state='') {
-        return `https://api.munzee.com/oauth?response_type=code&client_id=${this.client_id}&redirect_uri=${this.redirect_uri}&scope=read&state=${state}`
+        return `https://api.munzee.com/oauth?response_type=code&client_id=${this.client_id}&redirect_uri=${this.redirect_uri}&scope=read&state=${encodeURIComponent(state)}`
     }
 
     async getBearerToken (code) {

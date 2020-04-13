@@ -54,6 +54,9 @@ exports.munzee_bouncers_v1 = _munzee_bouncers[0];
 var _bouncers_limbo = require('./Modules/bouncers/limbo');
 exports.bouncers_limbo_v1 = _bouncers_limbo[0];
 
+var _db_munzees_list = require('./Modules/db/munzees/list');
+exports.db_munzees_list_v1 = _db_munzees_list[0];
+
 var _dev = require('./Modules/dev');
 exports.dev_v1 = _dev[0];
 
@@ -67,9 +70,11 @@ async function request(page, inputdata = {}, user_id = config.default_user_id, c
             document = (await db.collection('authToken').where('cryptokens', 'array-contains', user_id.toString()).limit(1).get()).docs[0]
             token = document.data().token;
         }
-        if (token.expires >= Date.now() - 60000) {
+        if (token.expires * 1000 < Date.now() + 60000) {
+        // if (token.expires >= Date.now() - 60000) {
+            console.log('Refresh',token);
             token = await API1.refreshToken(token);
-            await document.update({ token: token });
+            await document.ref.update({ token: token });
         }
         return await API1.request(token, page, inputdata);
     } catch (e) {
@@ -429,6 +434,11 @@ exports.clan_list_minute = functions.runWith({memory:"512MB"}).pubsub.topic('sha
         logo: "https://i.ibb.co/hs3Z3rN/Bushrangers-Ghost.png",
         tagline: "Boo!"
     }
+    clans.clans[-3] = {
+        name: "Angy",
+        logo: "https://munzee.global.ssl.fastly.net/images/avatars/ua49ut.png",
+        tagline: "This isn't a real clan"
+    }
     await db.collection('data').doc('clans').set(clans);
 });
 
@@ -495,13 +505,21 @@ exports.minute = functions.runWith({memory:"512MB",timeoutSeconds:540}).pubsub.t
             }
         }
     }
+    var gotDataFor = [];
     for(let member of memberData) {
         if(member.captures) {
+            if(!gotDataFor.includes(member.user_id)) gotDataFor.push(member.user_id);
             // if(!members[member.user_id]) members[member.user_id] = {};
             for(let task of tasks) {
                 if(!members[task]) members[task] = {};
                 members[task][member.user_id] = (members[task][member.user_id]||0) + utils.clan.tasks[task].function({cap:member.captures,dep:member.deploys,con:member.captures_on});
             }
+        }
+    }
+    for(let member of shadowData.members.filter(i=>!gotDataFor.includes(i))) {
+        for(let task of tasks) {
+            if(!members[task]) members[task] = {};
+            delete members[task][member];
         }
     }
 

@@ -91,7 +91,6 @@ module.exports = [
           } else if (reward.reward_id === 45) {
             ensure("rewards", 17);
             ensure("rewards", 23);
-            ensure("rewards", 24);
             ensure("rewards", 25);
             reqs.rewards[17] = {
               "reward_id": 17,

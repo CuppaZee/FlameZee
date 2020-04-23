@@ -1,4 +1,7 @@
 // const admin = require('firebase-admin');
+var rss = require('rss-parser');
+var parser = new rss();
+
 const functions = require('firebase-functions');
 const needle = require('needle');
 const spherical = require('spherical');
@@ -27,17 +30,20 @@ exports.generateCryptokens = functions.https.onRequest(async (req, res) => {
 var _auth = require('./Modules/auth');
 exports.auth_v1 = _auth[0];
 
+var _user_activity = require('./Modules/user/activity');
+exports.user_activity_v1 = _user_activity[0];
+
 var _user_details = require('./Modules/user/details');
 exports.user_details_v1 = _user_details[0];
 
-var _user_specials = require('./Modules/user/specials');
-exports.user_specials_v1 = _user_specials[0];
+var _user_inventory = require('./Modules/user/inventory');
+exports.user_inventory_v1 = _user_inventory[0];
 
 var _user_search = require('./Modules/user/search');
 exports.user_search_v1 = _user_search[0];
 
-var _user_activity = require('./Modules/user/activity');
-exports.user_activity_v1 = _user_activity[0];
+var _user_specials = require('./Modules/user/specials');
+exports.user_specials_v1 = _user_specials[0];
 
 var _clan_requirements = require('./Modules/clan/requirements');
 exports.clan_requirements_v1 = _clan_requirements[0];
@@ -398,6 +404,50 @@ exports["overpass"] = functions.https.onRequest(async (req, res) => {
 })
 
 
+exports.blogzee_checker_minute = functions.runWith({memory:"512MB"}).pubsub.topic('shadow').onPublish(async (message) => {
+    var data = (await db.collection('data').doc('blog').get()).data();
+    if(!data.run) return;
+    var update = {};
+    async function check(x) {
+        // Munzee
+        var feed = await parser.parseURL('https://www.munzeeblog.com/feed/')
+        if(feed.items[0].link !== data.munzee_blog) {
+            data.munzee_blog = feed.items[0].link;
+            update.munzee_blog = feed.items[0].link;
+
+            console.log('New Munzee Blog',feed.items[0].link);
+        } else {
+            console.log('Same Munzee Blog',feed.items[0].link);
+        }
+
+        if(x && Object.keys(update).length > 0) {
+            await db.collection('data').doc('blog').update(update);
+        }
+    }
+    check();
+    await Promise.all([
+        new Promise((resolve, reject) => {
+            setTimeout( async function() {
+                await check();
+                resolve("Success!")
+            }, 15000) 
+        }),
+        new Promise((resolve, reject) => {
+            setTimeout( async function() {
+                await check();
+                resolve("Success!")
+            }, 30000) 
+        }),
+        new Promise((resolve, reject) => {
+            setTimeout( async function() {
+                await check(true);
+                resolve("Success!")
+            }, 45000) 
+        }) 
+    ])
+})
+
+
 exports.clan_list_minute = functions.runWith({memory:"512MB"}).pubsub.topic('shadow').onPublish(async (message) => {
     var clans = (await db.collection('data').doc('clans').get()).data();
     var array = [];
@@ -437,6 +487,11 @@ exports.clan_list_minute = functions.runWith({memory:"512MB"}).pubsub.topic('sha
     clans.clans[-3] = {
         name: "Angy",
         logo: "https://munzee.global.ssl.fastly.net/images/avatars/ua49ut.png",
+        tagline: "This isn't a real clan"
+    }
+    clans.clans[-4] = {
+        name: "GrannyCache",
+        logo: "https://munzee.global.ssl.fastly.net/images/avatars/ua6av1.png",
         tagline: "This isn't a real clan"
     }
     await db.collection('data').doc('clans').set(clans);

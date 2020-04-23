@@ -92,7 +92,11 @@ function validateCode(code) {
 const mdbmunzees = yaml.safeLoad(fs.readFileSync(path.join(__dirname,'db/Munzees.yaml'), 'utf8'));
 mdbmunzees.get = function(x) {
   var y = this.find(x);
-  return this.find(i=>i.id===(y.redirect||y.id));
+  if(y) {
+    return this.find(i=>i.id===(y.redirect||y.id));
+  } else {
+    return undefined;
+  }
 }
 
 module.exports = {

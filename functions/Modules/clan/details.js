@@ -33,6 +33,7 @@ module.exports = [
         -2,
         -3,
         -4,
+        -5,
         251,
         1793,
         1551,
@@ -40,7 +41,9 @@ module.exports = [
         19,
         1695,
         1343,
-        1364
+        1364,
+        1498,
+        1491
       ];
       var [requirements, clan, shadow_data] = (await Promise.all([
         Flame.Request('clan/v2/requirements', { game_id: req.query.game_id || "85", clan_id: Number(req.query.clan_id || "1349") < 0 ? 1349 : Number(req.query.clan_id || "1349") }),

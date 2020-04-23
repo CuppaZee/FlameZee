@@ -71,6 +71,14 @@
           "function": "user_activity_v1"
         },
         {
+          "source": "/user/inventory",
+          "function": "user_inventory_v1"
+        },
+        {
+          "source": "/user/inventory/v1",
+          "function": "user_inventory_v1"
+        },
+        {
           "source": "/user/badges",
           "function": "user_badges"
         },
@@ -81,10 +89,6 @@
         {
           "source": "/user/specials/v1",
           "function": "user_specials_v1"
-        },
-        {
-          "source": "/user/inventory",
-          "function": "user_inventory"
         },
         {
           "source": "/user/search",

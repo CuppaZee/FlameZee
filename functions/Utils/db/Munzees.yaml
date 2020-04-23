@@ -701,6 +701,10 @@
   completion: missing_info
   category: misc
 
+- name: Battleaxe
+  icon: battle_axe
+  redirect: 140
+
 - name: Battle Axe
   icon: battleaxe
   id: 140
@@ -750,6 +754,9 @@
   id: 147
   completion: missing_info
   category: misc
+
+- name: Garden Pin
+  redirect: 148
 
 - name: Virtual Emerald
   icon: virtual_emerald
@@ -884,7 +891,7 @@
   category: misc
 
 - name: Hotel Munzee
-  icon: hotelmunzee
+  icon: hotel
   id: 170
   destination: rooms
   points:
@@ -1021,7 +1028,7 @@
   category: misc
 
 - name: Trail Munzee
-  icon: trailmunzee
+  icon: trail
   id: 190
   trail: true
   stops: 5
@@ -3058,6 +3065,9 @@
   completion: nothing
   category: misc
 
+- icon: rock_paper_scissors
+  redirect: 522
+
 - name: Rock Paper Scissors
   icon: rockpaperscissors
   id: 522
@@ -3087,6 +3097,9 @@
   id: 531
   completion: nothing
   category: misc
+
+- icon: fire_mystery
+  redirect: 532
 
 - name: Fire Mystery
   icon: firemystery
@@ -3694,6 +3707,9 @@
   completion: nothing
   category: misc
 
+- icon: ice_mystery
+  redirect: 651
+
 - name: Ice Mystery
   icon: icemystery
   id: 651
@@ -3999,6 +4015,9 @@
   id: 701
   completion: nothing
   category: misc
+
+- name: Horse
+  redirect: 702
 
 - name: Championship Horse
   icon: championshiphorse
@@ -4852,6 +4871,9 @@
   completion: nothing
   category: misc
 
+- icon: earth_mystery
+  redirect: 851
+
 - name: Earth Mystery
   icon: earthmystery
   id: 851
@@ -5440,6 +5462,9 @@
   completion: nothing
   category: misc
 
+- icon: water_mystery
+  redirect: 1020
+
 - name: Water Mystery
   icon: watermystery
   id: 1020
@@ -5835,6 +5860,9 @@
   id: 1085
   completion: nothing
   category: misc
+
+- icon: air_mystery
+  redirect: 1086
 
 - name: Air Mystery
   icon: airmystery
@@ -6789,6 +6817,9 @@
   id: 1244
   completion: nothing
   category: misc
+
+- name: Temp Virt
+  redirect: 1245
 
 - name: Temporary Virtual
   icon: temporaryvirtual
@@ -11165,6 +11196,10 @@
   completion: nothing
   category: misc
 
+- name: Joystick
+  icon: joystick
+  redirect: 1976
+
 - name: Joystick Physical
   icon: joystickphysical
   id: 1976
@@ -12822,11 +12857,17 @@
   completion: nothing
   category: misc
 
+- name: Aussie Kangaroo
+  redirect: 2333
+
 - name: Kangaroo Aussie Animal
   icon: kangarooaussieanimal
   id: 2333
   completion: nothing
   category: misc
+
+- name: Aussie Koala
+  redirect: 2334
 
 - name: Koala Aussie Animal
   icon: koalaaussieanimal
